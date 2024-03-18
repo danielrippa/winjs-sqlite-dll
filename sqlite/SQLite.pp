@@ -103,7 +103,7 @@ implementation
 
   function TDatabase.GetQueryResults;
   begin
-    Result := SQLiteUtils.GetQueryResults(FDatabase, PChar(aQuery));
+    Result := SQLiteUtils.GetQueryResults(FDatabase, PAnsiChar(aQuery));
   end;
 
 end.

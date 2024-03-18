@@ -13,6 +13,7 @@ interface
   function sqlite3_exec(Db: PSQLite3; Sql: PAnsiChar; Callback: Pointer; Arg: Pointer; var ErrorMessage: PAnsiChar): Integer; cdecl; external dll;
   function sqlite3_prepare_v2(Db: PSQLite3; Sql: PAnsiChar; SqlLength: Integer; var Statement: PSQLite3Stmt; Tail: PAnsiChar): Integer; cdecl; external dll;
   function sqlite3_step(Statement: PSQLite3Stmt): Integer; cdecl; external dll;
+  function sqlite3_reset(Statement: PSQLite3Stmt): Integer; cdecl; external dll;
   function sqlite3_finalize(Statement: PSQLite3Stmt): Integer; cdecl; external dll;
 
   function sqlite3_column_name(Statement: PSQLite3Stmt; ColumnIndex: Integer): PAnsiChar; cdecl; external dll;

@@ -9,7 +9,7 @@ interface
 
   procedure PrepareStatement(aDatabase: PSQLite3; aStatement: String; var Stmt: PSQLite3Stmt);
   procedure ExecuteStatement(aDatabase: PSQlite3; aStatement: String);
-  function GetQueryResults(aDatabase: PSQLite3; aQuery: PSQLite3Stmt): TRecords;
+  function GetQueryResults(aDatabase: PSQLite3; aQuery: String): TRecords;
   function FieldTypeAsString(aFieldType: TSQLiteFieldType): String;
   function StringToFieldType(aFieldType: String): TSQLiteFieldType;
 
@@ -77,35 +77,41 @@ implementation
 
   function GetQueryResults;
   var
+    QueryStatement: PSQLite3Stmt;
     ColumnCount: Integer;
     ErrorCode: Integer;
     Row: TRecord;
+    Field: TField;
     ColumnIndex: Integer;
     ColumnType: TSQLiteFieldType;
-    FieldName: String;
-    FieldType: String;
+    ColumnTypeIndex: Integer;
   begin
-    ColumnCount := sqlite3_column_count(aQuery);
 
-    while sqlite3_step(aQuery) = SQLITE_ROW do begin
+    PrepareStatement(aDatabase, aQuery, QueryStatement);
+
+    ColumnCount := sqlite3_column_count(QueryStatement);
+
+    while sqlite3_step(QueryStatement) = SQLITE_ROW do begin
 
       SetLength(Row, ColumnCount);
 
       for ColumnIndex := 0 to ColumnCount - 1 do begin
 
-        ColumnType := TSQLiteFieldType(sqlite3_column_type(aQuery, ColumnIndex));
+        ColumnTypeIndex := sqlite3_column_type(QueryStatement, ColumnIndex);
 
-        FieldType := FieldTypeAsString(ColumnType);
-        FieldName := sqlite3_column_name(aQuery, ColumnIndex);
+        ColumnType := TSQLiteFieldType(ColumnTypeIndex - 1);
 
         with Row[ColumnIndex] do begin
 
-          case ColumnType of
-            ftInteger: Value := sqlite3_column_int(aQuery, ColumnIndex);
-            ftReal:    Value := sqlite3_column_double(aQuery, ColumnIndex);
-            ftText:    Value := sqlite3_column_text(aQuery, ColumnIndex);
+          FieldType := FieldTypeAsString(ColumnType);
+          FieldName := sqlite3_column_name(QueryStatement, ColumnIndex);
 
-            ftBlob: Value := BlobAsVariant(aQuery, ColumnIndex);
+          case ColumnType of
+            ftInteger: Value := sqlite3_column_int(QueryStatement, ColumnIndex);
+            ftReal:    Value := sqlite3_column_double(QueryStatement, ColumnIndex);
+            ftText:    Value := sqlite3_column_text(QueryStatement, ColumnIndex);
+
+            ftBlob: Value := BlobAsVariant(QueryStatement, ColumnIndex);
           end;
 
         end;
@@ -113,7 +119,11 @@ implementation
       end;
 
       Result := Result + [Row];
+
     end;
+
+    sqlite3_reset(QueryStatement);
+
   end;
 
   function StringToFieldType;
