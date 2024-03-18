@@ -31,13 +31,22 @@ implementation
   function FieldValueAsJsValue(aFieldType: TSQLiteFieldType; aFieldValue: Variant): TJsValue;
   begin
     case aFieldType of
-      ftInteger: Result := IntAsJsNumber(Integer(aFieldValue));
-      ftReal:    Result := DoubleAsJsNumber(Double(aFieldValue));
-      ftText:    Result := StringAsJsString(String(aFieldValue));
+      ftInteger: begin
+        Result := IntAsJsNumber(Integer(aFieldValue));
+      end;
+      ftReal: begin
+        Result := DoubleAsJsNumber(Double(aFieldValue));
+      end;
+      ftText: begin
+        Result := StringAsJsString(String(aFieldValue));
+      end;
+      ftBlob: begin
+        Result := BlobFieldValueAsJsValue(aFieldValue);
+      end;
+      ftNull: begin
+        Result := Undefined;
+      end;
 
-      ftBlob: Result := BlobFieldValueAsJsValue(aFieldValue);
-
-      ftNull: Result := Undefined;
     end;
   end;
 
@@ -70,6 +79,7 @@ implementation
     RowCount: Integer;
     RowIndex: Integer;
     Row: TRecord;
+    RowJsValue: TJsValue;
   begin
     RowCount := Length(aRecords);
 
@@ -77,8 +87,9 @@ implementation
 
     for RowIndex := 0 to RowCount - 1 do begin
       Row := aRecords[RowIndex];
+      RowJsValue := RecordAsJsValue(Row);
 
-      SetArrayItem(Result, RowIndex, RecordAsJsValue(Row));
+      SetArrayItem(Result, RowIndex, RowJsValue);
     end;
   end;
 

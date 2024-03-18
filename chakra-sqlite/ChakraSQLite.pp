@@ -47,6 +47,7 @@ implementation
     CheckParams('getQueryResults', Args, ArgCount, [jsString], 1);
 
     Query := JsStringAsString(Args^);
+
     QueryResults := Database.GetQueryResults(Query);
 
     Result := RecordsAsJsValue(QueryResults);
