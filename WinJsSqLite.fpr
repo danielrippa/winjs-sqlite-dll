@@ -1,0 +1,7 @@
+library WinJsSqlite;
+
+uses ChakraSqlite;
+
+exports GetJsValue;
+
+end.
